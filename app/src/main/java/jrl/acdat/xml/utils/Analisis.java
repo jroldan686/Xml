@@ -11,10 +11,10 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.StringReader;
-import java.text.Format;
-import java.util.Locale;
+import java.util.ArrayList;
 
 import jrl.acdat.xml.R;
+import jrl.acdat.xml.model.Noticia;
 
 /**
  * Created by usuario on 12/12/17.
@@ -130,5 +130,53 @@ public class Analisis {
             eventType = xpp.next();
         }
         return builder.toString();
+    }
+
+    public static ArrayList<Noticia> analizarNoticias(File file) throws XmlPullParserException, IOException {
+        int eventType;
+        ArrayList<Noticia> noticias = null;
+        Noticia actual = null;
+        boolean dentroItem = false;
+        boolean dentroTitle = false;
+        boolean dentroLink = false;
+        XmlPullParser xpp = Xml.newPullParser();
+        xpp.setInput(new FileReader(file));
+        eventType=xpp.getEventType();
+        while (eventType!=XmlPullParser.END_DOCUMENT){
+            switch (eventType) {
+                case XmlPullParser.START_DOCUMENT:
+
+                    break;
+                case XmlPullParser.START_TAG:
+                    if(xpp.getName().equalsIgnoreCase("item")) {
+                        dentroItem = true;
+                        actual = new Noticia();
+                    }
+                    if(dentroItem && xpp.getName().equalsIgnoreCase("title"))
+                        dentroTitle = true;
+                    if(dentroItem && xpp.getName().equalsIgnoreCase("link"))
+                        dentroLink = true;
+                    break;
+                case XmlPullParser.TEXT:
+                    if(dentroTitle)
+                        actual.setTitle(xpp.getText());
+                    if(dentroLink)
+                        actual.setLink(xpp.getText());
+                    break;
+                case XmlPullParser.END_TAG:
+                    if(xpp.getName().equalsIgnoreCase("item")) {
+                        dentroItem = false;
+                        noticias.add(actual);
+                    }
+                    if(dentroItem && xpp.getName().equalsIgnoreCase("title"))
+                        dentroTitle = false;
+                    if(dentroItem && xpp.getName().equalsIgnoreCase("link"))
+                        dentroLink = false;
+                    break;
+            }
+            eventType = xpp.next();
+        }
+        //devolver el array de noticias
+        return noticias;
     }
 }

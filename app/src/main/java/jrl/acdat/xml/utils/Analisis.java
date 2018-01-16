@@ -2,18 +2,20 @@ package jrl.acdat.xml.utils;
 
 import android.content.Context;
 import android.content.res.XmlResourceParser;
+import android.os.Environment;
 import android.util.Xml;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlSerializer;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
 
-import jrl.acdat.xml.R;
 import jrl.acdat.xml.model.Noticia;
 
 /**
@@ -178,5 +180,22 @@ public class Analisis {
         }
         //devolver el array de noticias
         return noticias;
+    }
+
+    public static void crearXML(ArrayList<Noticia> noticias, String fichero) throws IOException {
+        FileOutputStream fout;
+        fout = new FileOutputStream(new File(Environment.getExternalStorageDirectory().getAbsolutePath(), fichero));
+        XmlSerializer serializer = Xml.newSerializer();
+        serializer.setOutput(fout, "UTF-8");
+        serializer.startDocument(null, true);
+        serializer.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output" , true); //poner tabulación
+        serializer.startTag(null, "titulares");
+        for (int i = 0; i < noticias.size(); i++) {
+
+        }
+        serializer.endTag(null, "titulares");
+        serializer.endDocument();
+        serializer.flush();
+        fout.close();
     }
 }
